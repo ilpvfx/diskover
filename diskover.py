@@ -11,6 +11,12 @@ diskover is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
 
+from monkey_patch import (
+    patch_all
+)
+
+patch_all()
+
 from scandir import scandir
 from rq import SimpleWorker, Queue
 from rq.registry import StartedJobRegistry

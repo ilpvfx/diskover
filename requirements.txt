@@ -1,6 +1,7 @@
-elasticsearch==5.5.3
+elasticsearch5==5.5.3
 requests==2.20.0
 scandir==1.9.0
 progressbar2==3.39.2
 redis==3.0.1
 rq==0.13.0
+elasticsearch-dsl
