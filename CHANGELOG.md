@@ -1,5 +1,30 @@
 # Diskover Change Log
 
+# [1.5.0.7] - 2019-09-27
+### added
+- -L --listen cli arg to diskover worker bot to override what redis rq to listen to
+- additional crawl options for diskover socket server "crawl" command (see wiki for more info)
+- improved duplicate file finding --finddupes
+- reduced time to calculate directory sizes
+### changed
+- replaced imp module with importlib for plugins
+- removed s3 inventory import feature (enterprise ver only feature)
+- removed -I index2 Redis dir cacheing and config entries in diskover.cfg.sample (enterprise ver only feature)
+- removed -G cost per gb (storage costs) and config entries in diskover.cfg.sample (enterprise ver only feature)
+- removed crawl bot continuous scanner and config entries in diskover.cfg.sample (enterprise ver only feature)
+### fixed
+- thread exhaustion from too many spawned threads when running finddupes
+
+# [1.5.0.6] - 2019-08-07
+### changed
+- newer versions of py modules in requirements.txt, update with "pip install -r requirements.txt"
+- new version of killredisconn.py - fixed zombie idle worker connections not getting removed from Redis
+- diskover-bot-launcher.sh v.1.6.3
+### fixed
+- requests dependency warning supported version for urllib3 in lsio docker hub image
+- user_prompt error when asking to overwrite index in Python 2
+- SyntaxError: invalid syntax user_prompt function error when starting bots using Python 2
+
 # [1.5.0.5] - 2019-07-31
 ### added
 - diskover Storage Agent support with new --storagent cli option (see https://github.com/shirosaidev/diskover-storage-agent)
