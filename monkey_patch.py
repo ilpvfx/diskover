@@ -53,7 +53,7 @@ class _ElasticSearch(Elasticsearch):
 
             kwargs['body'] = new_query.query(
                 'match', type=document_type
-            )
+            ).to_dict()
 
         result = super(_ElasticSearch, self).search(
             *args, **kwargs
