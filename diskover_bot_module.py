@@ -617,12 +617,12 @@ def calc_dir_size(dirlist, cliargs):
                     },
                     "total_file_count": {
                         "filter": {
-                            "term": { "_type": "file" }
+                            "term": { "type": "file" }
                         }
                     },
                     "total_dir_count": {
                         "filter": {
-                            "term": { "_type": "directory" }
+                            "term": { "type": "directory" }
                         }
                     }
                 }
@@ -638,24 +638,23 @@ def calc_dir_size(dirlist, cliargs):
                 },
                 "aggs": {
                     "filesizes": {
-                        "filter": { "term": { "_type": "file" } },
+                        "filter": { "term": { "type": "file" } },
                         "aggs": {
                             "total_size": { "sum": { "field": "filesize" } }
                         }
                     },
                     "total_file_count": {
                         "filter": {
-                            "term": { "_type": "file" }
+                            "term": { "type": "file" }
                         }
                     },
                     "total_dir_count": {
                         "filter": {
-                            "term": { "_type": "directory" }
+                            "term": { "type": "directory" }
                         }
                     }
                 }
             }
-
         # search ES and start scroll
         res = es.search(index=cliargs['index'], body=data, doc_type='file,directory', request_timeout=config['es_timeout'])
 
