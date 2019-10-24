@@ -1,8 +1,9 @@
+import copy
 import functools
 import elasticsearch_dsl
 
 try:
-    from elasticsearch5 import (
+    from elasticsearch import (
         Elasticsearch,
         helpers,
         Urllib3HttpConnection
@@ -51,8 +52,8 @@ class _ElasticSearch(Elasticsearch):
                 kwargs['body']
             )
 
-            kwargs['body'] = new_query.query(
-                'match', type=document_type
+            kwargs['body'] = new_query.filter(
+                'terms', type=document_type.split(',')
             ).to_dict()
 
         result = super(_ElasticSearch, self).search(
@@ -80,6 +81,25 @@ class _ElasticSearch(Elasticsearch):
 
     @property
     def indices(self):
+
+        def flatten_mapping(mappings):
+            flattend_mapping = dict()
+
+            for _, type_mapping in mappings.items():
+                for key, value in type_mapping.items():
+                    for k, v in value.items():
+                        flattend_mapping.setdefault(
+                            k, v
+                        )
+
+            flattend_mapping.setdefault(
+                'type', {'type': 'keyword'}
+            )
+
+            return (
+                {'properties': flattend_mapping}
+            )
+
         class Wrapper(object):
             def __init__(self, obj):
                 self.obj = obj
@@ -88,13 +108,32 @@ class _ElasticSearch(Elasticsearch):
                 if item in ('create', ):
                     def _remove_mapping(*args, **kwargs):
                         if u'mappings' in kwargs.get(u'body', {}):
-                            kwargs[u'body'].pop(
-                                u'mappings'
+                            kwargs['body']['mappings'] = flatten_mapping(
+                                kwargs[u'body'].pop(
+                                    u'mappings'
+                                )
                             )
 
-                        return self.obj.create(
+                        result = self.obj.create(
                             *args, **kwargs
                         )
+
+                        if u'index' in kwargs:
+                            mappings = (
+                                self.obj.get_mapping(kwargs['index'])
+                            )
+                            for name, mapping in (
+                                mappings[kwargs['index']]['mappings']['properties'].items()
+                            ):
+                                self.obj.put_mapping(
+                                    index=kwargs['index'], body={
+                                        'properties':  {
+                                            name: mapping
+                                        }
+                                    }
+                                )
+
+                        return result
 
                     return _remove_mapping
 
@@ -113,7 +152,17 @@ class _ElasticSearch(Elasticsearch):
         )
 
     def index(self, *args, **kwargs):
-        pass
+        new_body = (
+            kwargs.get('body').copy()
+        )
+
+        new_body.setdefault(
+            'type', kwargs.get('doc_type')
+        )
+
+        return super(_ElasticSearch, self).index(
+            index=kwargs.get('index'), body=new_body
+        )
 
 
 def patch_all():
